@@ -1,0 +1,3 @@
+samples:
+    sampleA: samples/sampleA.fastq
+    sampleB: samples/sampleB.fastq
