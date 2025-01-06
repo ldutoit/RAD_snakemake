@@ -43,7 +43,7 @@ This snakemake pipeline can run two modes:
 
 2. reference-based:
 
- ![](img/denovo_dag.svg)
+ ![](img/refmap_dag.svg)
 
 ### Basic input files
 
