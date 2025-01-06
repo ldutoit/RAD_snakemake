@@ -1,6 +1,6 @@
 # README.md
 
-This is a [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline implementing the [Stacks](https://catchenlab.life.illinois.edu/stacks/manual/) *denovo_map.pl* and *refmap.pl* workflows for paired-end RAD-Sequencing data. It outputs a [VCF file](https://en.wikipedia.org/wiki/Variant_Call_Format) at the end of the SNP calling.
+[Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline implementing the [Stacks](https://catchenlab.life.illinois.edu/stacks/manual/) *denovo_map.pl* and *refmap.pl* workflows for paired-end RAD-Sequencing data. It outputs a [VCF file](https://en.wikipedia.org/wiki/Variant_Call_Format) at the end of the SNP calling.
 
 ## Dependencies
 
