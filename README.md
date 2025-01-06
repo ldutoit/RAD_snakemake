@@ -1,6 +1,6 @@
 # README.md
 
-This is a [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline implementing the [Stacks](https://catchenlab.life.illinois.edu/stacks/manual/) 'denovo_map.pl' and 'refmap.pl' workflows for paired-end RAD-Sequencing data.
+This is a [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline implementing the [Stacks](https://catchenlab.life.illinois.edu/stacks/manual/) *denovo_map.pl* and *refmap.pl* workflows for paired-end RAD-Sequencing data.
 
 ## Quick start
 
@@ -31,6 +31,22 @@ SAMTOOLS v1.9
 
 ### Introduction
 
+This snakemake piple can run two mode:
+
+1. denovo:
+
+ ![](img/denovo_dag.svg)
+
+2. reference based:
+
+ ![](img/denovo_dag.svg)
+
 ### Configuration
+
+All the parameters are controlled from the file [config.yaml[(config.yaml):
+
+```
+
+
 
 ### Running the pipeline
