@@ -75,7 +75,7 @@ vcf_filtering:
 
 ### Removing individuals
 
-By default, the pipeline is run on all the samples in the barcode files. The pipeline creates a popmap.txt file with all the samples in ```barcodes.txt```. If ```popmap.txt`` exists, the pipeline is only run on the samples in this file.  This allows the pipeline to be re-run effectively by simply running snakemake after removing the low-quality samples from ```popmap.txt```.
+By default, the pipeline is run on all the samples in the barcode files. The pipeline creates a popmap.txt file with all the samples in ```barcodes.txt```. If ```popmap.txt``` exists, the pipeline is only run on the samples in this file.  This allows the pipeline to be re-run effectively by simply running snakemake after removing the low-quality samples from ```popmap.txt```.
 
 ### Running the pipeline
 
