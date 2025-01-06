@@ -58,8 +58,8 @@ All the parameters are controlled from the file [config.yaml[(config.yaml):
 mode: "denovo" # "denovo" or "refmap"
 
 raw_fastq: # single-end currently not supported
-  forward: "source_files/test_R1_001.fastq.gz" 
-  reverse: "source_files/test_R2_001.fastq.gz"
+  forward: "example_data/test_R1_001.fastq.gz" 
+  reverse: "example_data/test_R2_001.fastq.gz"
 
 cutadapt:
   adapter: "AGATCGGAAGAGC" # Sequence of the adapter
@@ -75,7 +75,7 @@ vcf_filtering:
 
 ### Removing individuals
 
-By default, the pipeline is run on all the samples in the barcode files. The pipeline creates a popmap.txt file with all the samples in ```barcodes.txt```. If ```popmap.txt``` exists, the pipeline is only run on the samples in this file.  This allows the pipeline to be re-run effectively by simply running snakemake after removing the low-quality samples from ```popmap.txt```.
+By default, the pipeline is run on all the samples in ```barcodes.txt```. The pipeline creates a popmap.txt file with all the samples in ```barcodes.txt```. If ```popmap.txt``` exists, the pipeline is only run on the samples in this file.  This allows the pipeline to be re-run effectively by simply running snakemake after removing the low-quality samples from ```popmap.txt```.
 
 ### Running the pipeline
 
