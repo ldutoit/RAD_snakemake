@@ -1,8 +1,8 @@
 mode: "denovo" # "denovo" or "refmap"
 
 raw_fastq: # single-end currently not supported
-  forward: "source_files/test_R1_001.fastq.gz" 
-  reverse: "source_files/test_R2_001.fastq.gz"
+  forward: "example_data/test_R1_001.fastq.gz" 
+  reverse: "example_data/test_R2_001.fastq.gz"
 
 cutadapt:
   adapter: "AGATCGGAAGAGC" # Sequence of the adapter
