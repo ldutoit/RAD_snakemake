@@ -1,4 +1,4 @@
-configfile: "config.yaml"
+configfile: "config.yaml"  # Replace with your actual config file name
 import os
 SAMPLES = []
 if os.path.exists("popmap.txt"):
@@ -20,23 +20,43 @@ rule make_popmap:
 		"""
         awk '{{print $3 "\\tpop"}}' {input} > {output}
 		"""
+if config["mode"] == "denovo":
 
-rule adapter_trimming:
-    input:
-        forward_reads=config["raw_fastq"]["forward"],
-        reverse_reads=config["raw_fastq"]["reverse"]
-    output:
-        "trimmed/trimmed_R1_001.fastq",
-        "trimmed/trimmed_R2_001.fastq"
-    shell:
-        """
-        mkdir -p trimmed
-        cutadapt -a {config[cutadapt][adapter]} -A {config[cutadapt][adapter]} \
-        -q {config[cutadapt][minimum_phred]} -o trimmed/trimmed_R1_001.fastq \
-        --minimum-length {config[cutadapt][minimum_length]}:{config[cutadapt][minimum_length]} \
-        -p trimmed/trimmed_R2_001.fastq {input.forward_reads} {input.reverse_reads}
-        fastqc trimmed/trimmed*fastq
-        """
+	rule adapter_trimming:
+	    input:
+	        forward_reads=config["raw_fastq"]["forward"],
+	        reverse_reads=config["raw_fastq"]["reverse"]
+	    output:
+	        "trimmed/trimmed_R1_001.fastq",
+	        "trimmed/trimmed_R2_001.fastq"
+	    shell:
+	        """
+	        mkdir -p trimmed
+	        cutadapt -a {config[cutadapt][adapter]} -A {config[cutadapt][adapter]} \
+	        -q {config[cutadapt][minimum_phred]} -o trimmed/trimmed_R1_001.fastq \
+	        --minimum-length {config[cutadapt][length]}:{config[cutadapt][length]} \
+	       	--length {config[cutadapt][length]} \
+	        -p trimmed/trimmed_R2_001.fastq {input.forward_reads} {input.reverse_reads}
+	        fastqc trimmed/trimmed*fastq
+	        """
+elif config["mode"] == "refmap":
+
+	rule adapter_trimming:
+	    input:
+	        forward_reads=config["raw_fastq"]["forward"],
+	        reverse_reads=config["raw_fastq"]["reverse"]
+	    output:
+	        "trimmed/trimmed_R1_001.fastq",
+	        "trimmed/trimmed_R2_001.fastq"
+	    shell:
+	        """
+	        mkdir -p trimmed
+	        cutadapt -a {config[cutadapt][adapter]} -A {config[cutadapt][adapter]} \
+	        -q {config[cutadapt][minimum_phred]} -o trimmed/trimmed_R1_001.fastq \
+	        --minimum-length {config[cutadapt][length]}:{config[cutadapt][length]} \
+	        -p trimmed/trimmed_R2_001.fastq {input.forward_reads} {input.reverse_reads}
+	        fastqc trimmed/trimmed*fastq
+		        """
 
 rule demultiplex:
 	input:
@@ -79,20 +99,35 @@ rule samtools_sort:
         "samtools sort -T sorted_reads/{wildcards.sample} "
         "-O bam {input} > {output}"
 
-rule refmap_variant_calling:
-	input:
-		bam=expand("sorted_reads/{sample}.bam", sample=SAMPLES),
-		popmap="popmap.txt"
-	output:
-		"output_refmap/populations.snps.vcf"
-	shell:
-		'ref_map.pl --samples sorted_reads --popmap popmap.txt -o output_refmap -X '"populations:--vcf"''
+if config["mode"] == "denovo":
+	rule variant_calling:
+		input:
+			fqgz1=expand("samples/{sample}.1.fq.gz", sample=SAMPLES),
+			fqgz2=expand("samples/{sample}.2.fq.gz", sample=SAMPLES),
+			popmap="popmap.txt"
+		output:
+			"output_SNPcalling/populations.snps.vcf"
+		shell:
+			'denovo_map.pl --paired --samples samples --popmap popmap.txt -o output_SNPcalling -X '"populations:--vcf"''
+elif config["mode"] == "refmap":
+	rule variant_calling:
+		input:
+			bam=expand("sorted_reads/{sample}.bam", sample=SAMPLES),
+			popmap="popmap.txt"
+		output:
+			"output_SNPcalling/populations.snps.vcf"
+		shell:
+			'ref_map.pl --samples sorted_reads --popmap popmap.txt -o output_SNPcalling -X '"populations:--vcf"''
 
 
 rule filtering:
 	input:
-		vcf="output_refmap/populations.snps.vcf",
+		vcf="output_SNPcalling/populations.snps.vcf",
 	output:
-		"filtered.recode.vcf"
+		"filtered.recode.vcf",
+		"filtered.imiss"
 	shell:
-		"vcftools --vcf {input.vcf} {config[vcf_filtering][parameters]} --recode --out filtered"
+		"""
+		vcftools --vcf {input.vcf} {config[vcf_filtering][parameters]} --recode --out filtered
+		vcftools --vcf filtered.recode.vcf --missing-indv --out filtered
+		"""
