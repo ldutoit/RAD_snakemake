@@ -26,8 +26,8 @@ To run the pipeline on the example data (3 samples, denovo).
    ```sh
   snakemake --cores all filtered.recode.vcf
    ```
-Outputs:
 
+Outputs:
 - **filtered.recode.vcf** The VCF file at the end of the pipeline.
 - **filtered.imiss** A file containing the proportion of missing data er individual. this file can be used to choose which individuals to exclude.
 
@@ -45,11 +45,10 @@ This snakemake pipeline can run two modes:
 
  ![](img/refmap_dag.svg)
 
-### Basic input files
+### Required input files
 
-barcodes: 
-
-popmap optional
+- barcodes.txt Needs to exist. The format is the combinatorial barcodes specified in the [Stacks manual](https://catchenlab.life.illinois.edu/stacks/manual/#specbc).
+- Fastq file. Raw fastq files are specified in the config file (see below).
 
 ### Configuration
 
@@ -74,20 +73,18 @@ vcf_filtering:
   parameters: "--max-missing 0.8 --maf 0.0001" # vcftools arguments, passed at once
 ```
 
-### Subsampling individuals
+### Removing individuals
 
-By default 
-
-BARCODE FILE
-
+By default, the pipeline is run on all the samples in the barcode files. The pipeline creates a popmap.txt file with all the samples in ```barcodes.txt```. If ```popmap.txt`` exists, the pipeline is only run on the samples in this file.  This allows the pipeline to be re-run effectively by simply running snakemake after removing the low-quality samples from ```popmap.txt```.
 
 ### Running the pipeline
 
-Once config.yaml has been adapted, simply run:
+Once [config.yaml](config.yaml) has been adapted, simply run:
 
 ```
-snakemake --dag filtered.recode.vcf | dot -Tsvg > dag.svg
+snakemake --dag filtered.recode.vcf | dot -Tsvg > dag.svg # create the graph of rules 
 snakemake --cores all filtered.recode.vcf
 ```
-
-OUTPUT
+Outputs:
+- **filtered.recode.vcf** The VCF file at the end of the pipeline.
+- **filtered.imiss** A file containing the proportion of missing data er individual. this file can be used to choose which individuals to exclude.
