@@ -1,13 +1,15 @@
+mode: "refmap" # "denovo" or "refmap"
+
 raw_fastq:
   forward: "source_files/test_R1_001.fastq.gz"
   reverse: "source_files/test_R2_001.fastq.gz"
 
 cutadapt:
   adapter: "AGATCGGAAGAGC"
-  minimum_length: "50"
+  length: "50" # min length for refmap, common length for denovo
   minimum_phred: "25"  # Changed '=' to ':'
 
-genome:
+genome: # only needed for refmap mode
   ref: "genome/stoneflygenomeassemblyv1.fasta"
 
 vcf_filtering:
