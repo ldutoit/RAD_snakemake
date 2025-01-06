@@ -89,3 +89,5 @@ Once config.yaml has been adapted, simply run:
 snakemake --dag filtered.recode.vcf | dot -Tsvg > dag.svg
 snakemake --cores all filtered.recode.vcf
 ```
+
+OUTPUT
