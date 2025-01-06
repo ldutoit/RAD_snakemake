@@ -1,3 +1,14 @@
-samples:
-    sampleA: samples/sampleA.fastq
-    sampleB: samples/sampleB.fastq
+raw_fastq:
+  forward: "source_files/test_R1_001.fastq.gz"
+  reverse: "source_files/test_R2_001.fastq.gz"
+
+cutadapt:
+  adapter: "AGATCGGAAGAGC"
+  minimum_length: "50"
+  minimum_phred: "25"  # Changed '=' to ':'
+
+genome:
+  ref: "genome/stoneflygenomeassemblyv1.fasta"
+
+vcf_filtering:
+  parameters: "--max-missing 0.8 --maf 0.0001" #vcftools arguments
