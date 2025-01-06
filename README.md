@@ -52,7 +52,7 @@ This snakemake pipeline can run two modes:
 
 ### Configuration
 
-All the parameters are controlled from the file [config.yaml[(config.yaml):
+All the parameters are controlled from the file [config.yaml](config.yaml):
 
 ```
 mode: "denovo" # "denovo" or "refmap"
