@@ -21,57 +21,60 @@ rule make_popmap:
         awk '{{print $3 "\\tpop"}}' {input} > {output}
 		"""
 if config["mode"] == "denovo":
-
 	rule adapter_trimming:
-	    input:
-	        forward_reads=config["raw_fastq"]["forward"],
-	        reverse_reads=config["raw_fastq"]["reverse"]
-	    output:
-	        "trimmed/trimmed_R1_001.fastq",
-	        "trimmed/trimmed_R2_001.fastq"
-	    shell:
-	        """
-	        mkdir -p trimmed
-	        cutadapt -a {config[cutadapt][adapter]} -A {config[cutadapt][adapter]} \
-	        -q {config[cutadapt][minimum_phred]} -o trimmed/trimmed_R1_001.fastq \
-	        --minimum-length {config[cutadapt][length]}:{config[cutadapt][length]} \
-	       	--length {config[cutadapt][length]} \
-	        -p trimmed/trimmed_R2_001.fastq {input.forward_reads} {input.reverse_reads}
-	        fastqc trimmed/trimmed*fastq
-	        """
+		input:
+			forward_reads=config["raw_fastq"]["forward"],
+			reverse_reads=config["raw_fastq"]["reverse"]
+		output:
+			"trimmed/trimmed_R1_001.fastq",
+			"trimmed/trimmed_R2_001.fastq"
+		threads: workflow.cores
+		shell:
+			"""
+			mkdir -p trimmed
+			cutadapt -j {threads} -a {config[cutadapt][adapter]} -A {config[cutadapt][adapter]} \
+			-q {config[cutadapt][minimum_phred]} -o trimmed/trimmed_R1_001.fastq \
+			--minimum-length {config[cutadapt][length]}:{config[cutadapt][length]} \
+			--length {config[cutadapt][length]} \
+			-p trimmed/trimmed_R2_001.fastq {input.forward_reads} {input.reverse_reads}
+			fastqc trimmed/trimmed*fastq
+			"""
 elif config["mode"] == "refmap":
-
 	rule adapter_trimming:
-	    input:
-	        forward_reads=config["raw_fastq"]["forward"],
-	        reverse_reads=config["raw_fastq"]["reverse"]
-	    output:
-	        "trimmed/trimmed_R1_001.fastq",
-	        "trimmed/trimmed_R2_001.fastq"
-	    shell:
-	        """
-	        mkdir -p trimmed
-	        cutadapt -a {config[cutadapt][adapter]} -A {config[cutadapt][adapter]} \
-	        -q {config[cutadapt][minimum_phred]} -o trimmed/trimmed_R1_001.fastq \
-	        --minimum-length {config[cutadapt][length]}:{config[cutadapt][length]} \
-	        -p trimmed/trimmed_R2_001.fastq {input.forward_reads} {input.reverse_reads}
-	        fastqc trimmed/trimmed*fastq
-		        """
-
+		input:
+			forward_reads=config["raw_fastq"]["forward"],
+			reverse_reads=config["raw_fastq"]["reverse"]
+		output:
+			"trimmed/trimmed_R1_001.fastq",
+			"trimmed/trimmed_R2_001.fastq"
+		threads: workflow.cores
+		shell:
+			"""
+			mkdir -p trimmed
+			cutadapt -j {threads} -a {config[cutadapt][adapter]} -A {config[cutadapt][adapter]} \
+			-q {config[cutadapt][minimum_phred]} -o trimmed/trimmed_R1_001.fastq \
+			--minimum-length {config[cutadapt][length]}:{config[cutadapt][length]} \
+			-p trimmed/trimmed_R2_001.fastq {input.forward_reads} {input.reverse_reads}
+			fastqc trimmed/trimmed*fastq
+			"""
 rule demultiplex:
-	input:
-		"trimmed/trimmed_R1_001.fastq",
-		"trimmed/trimmed_R2_001.fastq"
-	output:
-		fqgz1=expand("samples/{sample}.1.fq.gz", sample=SAMPLES),
-		fqgz2=expand("samples/{sample}.2.fq.gz", sample=SAMPLES),
-	shell:
-        	"""
-	        mkdir -p raw;
-	        ln -sf $PWD/trimmed/*fastq $PWD/raw/;
-	        process_radtags -P -p raw/ -o ./samples/ -b barcodes.txt -e pstI -r -c -q --inline-inline
-	        """
+    input:
+        r1="trimmed/trimmed_R1_001.fastq",
+        r2="trimmed/trimmed_R2_001.fastq",
+        barcodes="barcodes.txt"
+    output:
+        fqgz1=expand("samples/{sample}.1.fq.gz", sample=SAMPLES),
+        fqgz2=expand("samples/{sample}.2.fq.gz", sample=SAMPLES)
+    threads: workflow.cores  # Adjust based on your requirements
+    shell:
+        """
+        mkdir -p raw
+        ln -sf {input.r1} raw/trimmed_R1_001.fastq
+        ln -sf {input.r2} raw/trimmed_R2_001.fastq
 
+        # Running process_radtags with provided parameters
+        process_radtags -P -p raw/ -o ./samples/ -b {input.barcodes} -e pstI -r -c -q --inline-inline
+        """
 rule index_genome:
 	input:
 		genome=config["genome"]["ref"]
@@ -116,6 +119,7 @@ elif config["mode"] == "refmap":
 			popmap="popmap.txt"
 		output:
 			"output_SNPcalling/populations.snps.vcf"
+		threads: workflow.cores		
 		shell:
 			'ref_map.pl --samples sorted_reads --popmap popmap.txt -o output_SNPcalling -X '"populations:--vcf"''
 
@@ -126,8 +130,10 @@ rule filtering:
 	output:
 		"filtered.recode.vcf",
 		"filtered.imiss"
+	threads: workflow.cores
 	shell:
 		"""
 		vcftools --vcf {input.vcf} {config[vcf_filtering][parameters]} --recode --out filtered
 		vcftools --vcf filtered.recode.vcf --missing-indv --out filtered
 		"""
+
