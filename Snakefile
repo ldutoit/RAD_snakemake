@@ -69,9 +69,10 @@ rule demultiplex:
     shell:
         """
         mkdir -p raw
-        ln -sf {input.r1} raw/trimmed_R1_001.fastq
-        ln -sf {input.r2} raw/trimmed_R2_001.fastq
-
+		cd raw
+		ln -sf ../{input.r1} .
+        ln -sf ../{input.r2} .
+		cd ..
         # Running process_radtags with provided parameters
         process_radtags -P -p raw/ -o ./samples/ -b {input.barcodes} -e pstI -r -c -q --inline-inline
         """
