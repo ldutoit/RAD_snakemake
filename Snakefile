@@ -76,17 +76,19 @@ rule demultiplex:
         # Running process_radtags with provided parameters
         process_radtags -P -p raw/ -o ./samples/ -b {input.barcodes} -e pstI -r -c -q --inline-inline
         """
-rule index_genome:
-	input:
-		genome=config["genome"]["ref"]
-	output:
-		"{ref}.amb"
-	shell:
-		"bwa index {genome}"
 
+rule index_genome:
+    input:
+        genome=config["genome"]["ref"]
+    output:
+        expand("{genome}.{ext}", genome=config["genome"]["ref"], ext=["amb", "ann", "bwt", "pac", "sa"])
+    shell:
+        "bwa index {input.genome}"
 rule bwa_map:
     input:
-        genome=config["genome"]["ref"],
+        genome=expand("{genome}.{ext}",
+                      genome=config["genome"]["ref"],
+                      ext=["amb", "ann", "bwt", "pac", "sa"]),
         read1="samples/{sample}.1.fq.gz",
         read2="samples/{sample}.2.fq.gz"
     output:
