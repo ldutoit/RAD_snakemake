@@ -84,26 +84,31 @@ rule index_genome:
         expand("{genome}.{ext}", genome=config["genome"]["ref"], ext=["amb", "ann", "bwt", "pac", "sa"])
     shell:
         "bwa index {input.genome}"
+
+
 rule bwa_map:
     input:
-        genome=expand("{genome}.{ext}",
-                      genome=config["genome"]["ref"],
-                      ext=["amb", "ann", "bwt", "pac", "sa"]),
-        read1="samples/{sample}.1.fq.gz",
+        index = config["genome"]["ref"] + ".amb",
+        genome = config["genome"]["ref"],
+	read1="samples/{sample}.1.fq.gz",
         read2="samples/{sample}.2.fq.gz"
     output:
         "mapped_reads/{sample}.bam"
     shell:
-        "bwa mem {input.genome} {input.read1} {input.read2} | samtools view -Sb - > {output}"
-
+    	"""
+        mkdir -p mapped_reads
+        bwa mem {input.genome} {input.read1} {input.read2} | samtools view -Sb - > {output}
+    	"""
 rule samtools_sort:
     input:
         "mapped_reads/{sample}.bam"
     output:
         "sorted_reads/{sample}.bam"
     shell:
-        "samtools sort -T sorted_reads/{wildcards.sample} "
-        "-O bam {input} > {output}"
+        """
+        mkdir -p sorted_reads
+    	samtools sort -T sorted_reads/{wildcards.sample} -O bam {input} > {output}
+    	"""
 
 if config["mode"] == "denovo":
 	rule variant_calling:
