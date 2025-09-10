@@ -10,6 +10,14 @@ else:
 		for line in f:
 			SAMPLES.append(line.split()[2])
 
+def get_reads(wildcards):
+    r1 = f"samples/{wildcards.sample}.1.fq.gz"
+    r2 = f"samples/{wildcards.sample}.2.fq.gz"
+    if not os.path.exists(r1):
+        r1 = f"samples/{wildcards.sample}.1.fq"
+    if not os.path.exists(r2):
+        r2 = f"samples/{wildcards.sample}.2.fq"
+    return [r1, r2]
 
 rule make_popmap:
 	input:
@@ -85,12 +93,14 @@ rule index_genome:
     shell:
         "bwa index {input.genome}"
 
+
 rule bwa_map:
     input:
         index = config["genome"]["ref"] + ".amb",
         genome = config["genome"]["ref"],
-        read1 = "samples/{sample}.1.fq",
-        read2 = "samples/{sample}.2.fq"
+        reads = get_reads
+    output:
+        "mapped_reads/{sample}.bam"
     output:
         "mapped_reads/{sample}.bam"
     threads: workflow.cores
