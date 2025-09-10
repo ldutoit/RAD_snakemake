@@ -10,14 +10,6 @@ else:
 		for line in f:
 			SAMPLES.append(line.split()[2])
 
-def get_reads(wildcards):
-    r1 = f"samples/{wildcards.sample}.1.fq.gz"
-    r2 = f"samples/{wildcards.sample}.2.fq.gz"
-    if not os.path.exists(r1):
-        r1 = f"samples/{wildcards.sample}.1.fq"
-    if not os.path.exists(r2):
-        r2 = f"samples/{wildcards.sample}.2.fq"
-    return [r1, r2]
 
 rule make_popmap:
 	input:
@@ -98,18 +90,23 @@ rule bwa_map:
     input:
         index = config["genome"]["ref"] + ".amb",
         genome = config["genome"]["ref"],
-        reads = get_reads
-    output:
+		read1 = lambda wildcards: next(p for p in [
+            f"samples/{wildcards.sample}.1.fq.gz",
+            f"samples/{wildcards.sample}.1.fq"
+        ] if os.path.exists(p)),
+        read2 = lambda wildcards: next(p for p in [
+            f"samples/{wildcards.sample}.2.fq.gz",
+            f"samples/{wildcards.sample}.2.fq"
+        ] if os.path.exists(p)),    output:
         "mapped_reads/{sample}.bam"
-    output:
-        "mapped_reads/{sample}.bam"
-    threads: workflow.cores
+    threads: 8
     shell:
         """
         mkdir -p mapped_reads
         bwa mem -t {threads} {input.genome} {input.read1} {input.read2} \
             | samtools view -@ {threads} -Sb - > {output}
         """
+
 
 rule samtools_sort:
     input:
