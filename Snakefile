@@ -85,20 +85,22 @@ rule index_genome:
     shell:
         "bwa index {input.genome}"
 
-
 rule bwa_map:
     input:
         index = config["genome"]["ref"] + ".amb",
         genome = config["genome"]["ref"],
-	read1="samples/{sample}.1.fq.gz",
-        read2="samples/{sample}.2.fq.gz"
+        read1 = "samples/{sample}.1.fq",
+        read2 = "samples/{sample}.2.fq"
     output:
         "mapped_reads/{sample}.bam"
+    threads: workflow.cores
     shell:
-    	"""
+        """
         mkdir -p mapped_reads
-        bwa mem {input.genome} {input.read1} {input.read2} | samtools view -Sb - > {output}
-    	"""
+        bwa mem -t {threads} {input.genome} {input.read1} {input.read2} \
+            | samtools view -@ {threads} -Sb - > {output}
+        """
+
 rule samtools_sort:
     input:
         "mapped_reads/{sample}.bam"
